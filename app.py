@@ -1,3 +1,4 @@
+
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -12,6 +13,16 @@ st.set_page_config(
 
 st.title("🌿 Plant Disease Detection")
 st.write("Upload a leaf image to detect the plant and its disease.")
+
+st.subheader("🌱 Supported Crops")
+
+st.write("""
+- 🍎 Apple
+- 🌽 Corn (Maize)
+- 🍇 Grape
+- 🥔 Potato
+- 🍅 Tomato
+""")
 
 @st.cache_resource
 def load_model():
@@ -55,9 +66,17 @@ if uploaded_file is not None:
 
     plant, disease = predicted_class.split("___")
 
-    st.success(f"Plant: {plant}")
-    st.success(f"Disease: {disease}")
-    st.info(f"Confidence: {confidence:.2f}%")
+    if confidence < 70:
+        st.warning(
+            "⚠️ Low confidence — please upload a clearer leaf image"
+        )
+        st.info(
+            f"Best prediction: {plant} - {disease} ({confidence:.2f}%)"
+        )
+    else:
+        st.success(f"Plant: {plant}")
+        st.success(f"Disease: {disease}")
+        st.info(f"Confidence: {confidence:.2f}%")
 
     st.subheader("Top Predictions")
 
@@ -65,7 +84,9 @@ if uploaded_file is not None:
 
     for index in top_indices:
         name = class_names[index].split("___")
+
         st.write(
             f"{name[0]} - {name[1]}: "
             f"{predictions[index] * 100:.2f}%"
         )
+
